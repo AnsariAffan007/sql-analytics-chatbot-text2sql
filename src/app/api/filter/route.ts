@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     response = await openaiClient.chat.completions.create({
       messages: [
         { role: "system", content: getSystemPrompt() },
-        { role: "user", content: body.prompt }
+        { role: "user", content: getUserPrompt(body.prompt) }
       ],
       model: TASK_MODELS.filter
     })
@@ -39,26 +39,8 @@ export async function POST(request: Request) {
   )
 }
 
-const getSystemPrompt = () => {
-  return `
-  You are a database schema filter.
-  You will receive:
-  - A complete database schema containing multiple tables.
-  - A user prompt describing a task, query, or feature.
-  Your job is to:
-  - Identify only the tables that are relevant to the user prompt.
-  - Include a table only if it is directly or indirectly required to fulfill the task.
-  - Preserve the exact original format of the schema for each selected table.
-  Strict rules:
-  - Reply only with relevant schemas
-  - Do not modify table names, column names, types, comments, ordering, or formatting.
-  - Do not explain, summarize, or add reasoning.
-  - Do not include irrelevant tables.
-  Do not add new tables or fields.
-  Output only the selected schemas, concatenated exactly as received.
-  If no tables are relevant, output:
-  NO_RELEVANT_SCHEMAS
-  Schemas:\n
-  ${DVD_RENTAL_SCHEMA}
-  `
-}
+const getSystemPrompt = () =>
+  `You are a database schema filter. You will receive: (1) a complete database schema containing multiple tables, and (2) a user prompt describing a task, query, or feature. Your job is to identify only the tables that are relevant to the user prompt. Include a table only if it is directly or indirectly required to fulfill the task. Preserve the exact original format of each selected table. Strict rules: Do not modify table names, column names, data types, comments, ordering, or formatting. Do not explain, summarize, or provide reasoning. Do not include irrelevant tables. Do not add new tables or fields. Output only the selected schemas, concatenated exactly as they were received. If no tables are relevant, output exactly NO_RELEVANT_SCHEMAS.`
+
+const getUserPrompt = (prompt: string) =>
+  `<SCHEMAS>${DVD_RENTAL_SCHEMA}</SCHEMAS><USER_PROMPT>${prompt}</USER_PROMPT>`;

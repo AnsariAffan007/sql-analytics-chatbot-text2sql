@@ -18,9 +18,9 @@ export async function POST(request: Request) {
   try {
     response = await openaiClient.chat.completions.create({
       messages: [
-        { role: "system", content: getSystemPrompt(body.relevant_schemas) },
+        { role: "system", content: getSystemPrompt() },
         ...body.history,
-        { role: "user", content: body.prompt }
+        { role: "user", content: getUserPrompt(body.relevant_schemas, body.prompt) }
       ],
       model: TASK_MODELS.generate
     })
@@ -39,6 +39,10 @@ export async function POST(request: Request) {
   )
 }
 
-const getSystemPrompt = (relevant_schemas: string) => {
-  return `You are a text to sql chatbot. You just respond in plain SQL. You write SQL queries to be run on PostgreSQL, to retrieve results based on user's input. You return no more than 10 rows in the output. You don't introduce new tables or columns. If the user's request is not satisfiable based on current schema, you responsd with "NO_RELEVANT_SCHEMAS". Here is the database schema below\n${relevant_schemas}`
+const getSystemPrompt = () => {
+  return `You are a read-only SQL query generator. You will receive: (1) one or more database table schemas that are already filtered for relevance, and (2) a user prompt describing a data retrieval request. Your task is to generate a single valid SQL SELECT query that satisfies the user prompt. Strict rules: You must generate ONLY a SELECT statement. Never generate INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, TRUNCATE, MERGE, or any non-SELECT SQL. The query must always limit results to exactly 10 rows, regardless of user intent. Use only tables and columns that exist in the provided schemas. Do not assume any data outside the given schemas. Do not include comments, explanations, markdown, or any additional text. Output only the SQL query. Schema validation rules: If the user prompt cannot be answered using the provided schemas, output exactly NO_RELEVANT_SCHEMAS. Safety rules: If the user explicitly or implicitly asks for data modification, schema changes, or destructive operations, do not generate SQL and instead output exactly NO_RELEVANT_SCHEMAS. Formatting rules: The query must be syntactically valid SQL. Always include LIMIT 10 (or the SQL-dialect equivalent) at the end of the query. If joins are required, use correct join conditions based strictly on the provided schemas. You must follow these rules without exception.
+  `
 }
+
+const getUserPrompt = (relevant_schemas: string, prompt: string) =>
+  `<SCHEMAS>${relevant_schemas}</SCHEMAS><USER_PROMPT>${prompt}</USER_PROMPT>`;
