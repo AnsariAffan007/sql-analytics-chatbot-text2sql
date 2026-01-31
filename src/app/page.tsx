@@ -1,66 +1,73 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { SubmitEventHandler, useEffect, useRef, useState } from "react";
+import SimpleBar from 'simplebar-react';
+import 'simplebar-react/dist/simplebar.min.css';
+import OpenAI from "openai";
+import Markdown from 'react-markdown'
+import SimplebarCore from "simplebar"
+import "./app.css"
+
+// #region MAIN
+function Page() {
+
+  const [messages, setMessages] = useState<{ party: "ai" | "self", content: string }[]>([])
+  const [history, setHistory] = useState<OpenAI.Chat.Completions.ChatCompletionMessageParam[]>([])
+
+  const [loading, setLoading] = useState(false)
+  const promptInputRef = useRef<HTMLInputElement>(null)
+
+  // #region Scroll
+  const simplebarRef = useRef<SimplebarCore>(null)
+  const scrollToBottom = () => {
+    const scrollEl = simplebarRef.current?.getScrollElement()
+    if (scrollEl) {
+      scrollEl.scrollTo({
+        top: scrollEl.scrollHeight,
+        behavior: "smooth"
+      })
+    }
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const sendMessage: SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault()
+    console.log("Hello")
+  }
+
+  // #region JSX
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="container">
+
+      <div className="chatbox">
+        <div className="title">
+          <p>Text-to-SQL Chatbot</p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="chatarea">
+          <SimpleBar style={{ height: "100%" }} ref={simplebarRef}>
+            <div className="chats-container">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`message ${message.party === "self" ? "sent" : "recieved"}`}
+                >
+                  <Markdown>{message.content}</Markdown>
+                </div>
+              ))}
+            </div>
+          </SimpleBar>
         </div>
-      </main>
+        <form onSubmit={sendMessage} className="chatinput">
+          <input autoComplete="off" name="chat-prompt" type="text" placeholder="Type your prompt" ref={promptInputRef} />
+          <button type="submit" disabled={loading}>Send {" >"}</button>
+        </form>
+      </div>
+
     </div>
-  );
+  )
 }
+
+export default Page

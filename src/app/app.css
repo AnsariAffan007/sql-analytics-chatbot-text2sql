@@ -1,0 +1,101 @@
+.container {
+  height: 100svh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container>.chatbox {
+  margin: 24px;
+  height: 80%;
+  width: 60%;
+  box-shadow: 0 0 8px #ccc;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.container>.chatbox>.title {
+  box-shadow: 0 2px 6px #ddd;
+  padding-block: 16px;
+}
+
+.container>.chatbox>.title>p {
+  text-align: center;
+}
+
+.container>.chatbox>.chatarea {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.container>.chatbox>.chatarea .chats-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.container>.chatbox>.chatarea .message {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  max-width: 75%;
+  width: fit-content;
+  color: #222;
+}
+
+.container>.chatbox>.chatarea .message.sent {
+  margin-left: auto;
+}
+
+.container>.chatbox>.chatarea .message.recieved {
+  margin-right: auto;
+}
+
+.container>.chatbox>.chatarea .message.recieved ol,
+.container>.chatbox>.chatarea .message.recieved ul {
+  padding-left: 1.5rem;
+  /* control bullet indentation */
+  margin: 0.5rem 0;
+  box-sizing: border-box;
+}
+
+.container>.chatbox>.chatarea .message.recieved p,
+.container>.chatbox>.chatarea .message.recieved li {
+  word-break: break-word;
+}
+
+.container>.chatbox>.chatarea .message.recieved hr {
+  margin-block: 8px;
+}
+
+.container>.chatbox>.chatinput {
+  box-shadow: 0 -2px 6px #ddd;
+  display: flex;
+  column-gap: 16px;
+  padding: 8px;
+}
+
+.container>.chatbox>.chatinput>input {
+  flex: 1;
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.container>.chatbox>.chatinput>input:focus,
+.container>.chatbox>.chatinput>input:active {
+  outline: none;
+}
+
+.container>.chatbox>.chatinput>button {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.container>.chatbox>.chatinput>button:active {
+  outline: 1px solid #ccc
+}
