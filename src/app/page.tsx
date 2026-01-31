@@ -62,7 +62,11 @@ function Page() {
     // Make API Call to generate SQL on server, and getting the SQL
     let sqlGenerationResponse = null
     try {
-      sqlGenerationResponse = await axios.post("/api/generate", { prompt: prompt, history: history })
+      sqlGenerationResponse = await axios.post("/api/generate", { 
+        prompt: prompt, 
+        history: history,
+        relevant_schemas: filteredSchemasResponse.data.data || ""
+      })
       setSqlQuery(sqlGenerationResponse.data?.data || "")
     }
     catch (e) {
@@ -125,6 +129,9 @@ function Page() {
       <div className="output-container">
         <div className="schemas">
           <label>Relevant Schemas</label>
+          <SimpleBar style={{ height: "100%" }}>
+            {sqlSchemas}
+          </SimpleBar>
         </div>
         <div className="sql-query">
           <label>SQL Query</label>

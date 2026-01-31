@@ -1,4 +1,3 @@
-import DVD_RENTAL_SCHEMA from "@/data/dvd-rental-schema";
 import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -19,7 +18,7 @@ export async function POST(request: Request) {
   try {
     response = await openaiClient.chat.completions.create({
       messages: [
-        { role: "system", content: getSystemPrompt() },
+        { role: "system", content: getSystemPrompt(body.relevant_schemas) },
         ...body.history,
         { role: "user", content: body.prompt }
       ],
@@ -40,6 +39,6 @@ export async function POST(request: Request) {
   )
 }
 
-const getSystemPrompt = () => {
-  return `You are a text to sql chatbot. You just respond in plain SQL. You write SQL queries to be run on PostgreSQL, to retrieve results based on user's input. You return no more than 10 rows in the output. You don't introduce new tables or columns. If the user's request is not satisfiable based on current schema, you responsd with "Insufficient information". Here is the database schema below\n${DVD_RENTAL_SCHEMA}`
+const getSystemPrompt = (relevant_schemas: string) => {
+  return `You are a text to sql chatbot. You just respond in plain SQL. You write SQL queries to be run on PostgreSQL, to retrieve results based on user's input. You return no more than 10 rows in the output. You don't introduce new tables or columns. If the user's request is not satisfiable based on current schema, you responsd with "NO_RELEVANT_SCHEMAS". Here is the database schema below\n${relevant_schemas}`
 }

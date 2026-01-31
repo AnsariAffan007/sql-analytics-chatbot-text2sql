@@ -50,6 +50,7 @@ const getSystemPrompt = () => {
   - Include a table only if it is directly or indirectly required to fulfill the task.
   - Preserve the exact original format of the schema for each selected table.
   Strict rules:
+  - Reply only with relevant schemas
   - Do not modify table names, column names, types, comments, ordering, or formatting.
   - Do not explain, summarize, or add reasoning.
   - Do not include irrelevant tables.
