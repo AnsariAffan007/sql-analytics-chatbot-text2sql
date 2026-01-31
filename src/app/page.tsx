@@ -51,7 +51,7 @@ function Page() {
     // Make API Call to filter SQL Schemas
     let filteredSchemasResponse = null
     try {
-      filteredSchemasResponse = await axios.post("/api/contextualize", { prompt: prompt })
+      filteredSchemasResponse = await axios.post("/api/filter", { prompt: prompt })
       setSqlSchemas(filteredSchemasResponse.data.data)
     }
     catch (e) {

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         { role: "system", content: getSystemPrompt() },
         { role: "user", content: body.prompt }
       ],
-      model: TASK_MODELS.contextualize
+      model: TASK_MODELS.filter
     })
   }
   catch (e) {
