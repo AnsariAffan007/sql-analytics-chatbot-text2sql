@@ -8,6 +8,7 @@ import Markdown from 'react-markdown'
 import SimplebarCore from "simplebar"
 import "./app.css"
 import axios from "axios"
+import { format } from "sql-formatter"
 
 // #region MAIN
 function Page() {
@@ -62,8 +63,8 @@ function Page() {
     // Make API Call to generate SQL on server, and getting the SQL
     let sqlGenerationResponse = null
     try {
-      sqlGenerationResponse = await axios.post("/api/generate", { 
-        prompt: prompt, 
+      sqlGenerationResponse = await axios.post("/api/generate", {
+        prompt: prompt,
         history: history,
         relevant_schemas: filteredSchemasResponse.data.data || ""
       })
@@ -87,7 +88,10 @@ function Page() {
     }
     // Make API Call to interpret SQL Output by LLM
     try {
-      const response = await axios.post("/api/interpret", { sqlOutput: postgresQueryResponse.data.data })
+      const response = await axios.post("/api/interpret", {
+        prompt: prompt,
+        sqlOutput: postgresQueryResponse.data.data
+      })
       setMessages(prev => ([...prev, { party: "ai", content: response.data.data || "" }]))
     }
     catch (e) {
@@ -130,13 +134,17 @@ function Page() {
         <div className="schemas">
           <label>Relevant Schemas</label>
           <SimpleBar style={{ height: "100%" }}>
-            {sqlSchemas}
+            <pre style={{ whiteSpace: "pre-wrap" }}>
+              {sqlSchemas}
+            </pre>
           </SimpleBar>
         </div>
         <div className="sql-query">
           <label>SQL Query</label>
           <SimpleBar style={{ height: "100%" }}>
-            {sqlQuery}
+            <pre style={{ whiteSpace: "pre-wrap" }}>
+              {format(sqlQuery, { language: "postgresql" })}
+            </pre>
           </SimpleBar>
         </div>
         <div className="sql-output">
