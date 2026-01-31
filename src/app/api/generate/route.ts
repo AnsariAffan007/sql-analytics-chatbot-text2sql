@@ -1,4 +1,5 @@
 import DVD_RENTAL_SCHEMA from "@/data/dvd-rental-schema";
+import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -7,7 +8,6 @@ const openaiClient = new OpenAI({
   apiKey: "ollama",
   dangerouslyAllowBrowser: true
 });
-const TEXT_TO_SQL_MODEL = "llama3.2:3b"
 
 // #region POST
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         ...body.history,
         { role: "user", content: body.prompt }
       ],
-      model: TEXT_TO_SQL_MODEL
+      model: TASK_MODELS.generate
     })
   }
   catch (e) {

@@ -19,6 +19,7 @@ function Page() {
   const promptInputRef = useRef<HTMLInputElement>(null)
 
   // Output states
+  const [sqlSchemas, setSqlSchemas] = useState("");
   const [sqlQuery, setSqlQuery] = useState("");
   const [sqlOutput, setSqlOutput] = useState("");
 
@@ -33,7 +34,7 @@ function Page() {
       })
     }
   }
-  console.log(sqlOutput)
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -47,6 +48,17 @@ function Page() {
     // Clear the prompt input
     if (promptInputRef.current) promptInputRef.current.value = ""
     setLoading(true)
+    // Make API Call to filter SQL Schemas
+    let filteredSchemasResponse = null
+    try {
+      filteredSchemasResponse = await axios.post("/api/contextualize", { prompt: prompt })
+      setSqlSchemas(filteredSchemasResponse.data.data)
+    }
+    catch (e) {
+      console.log("Error filtering schemas: ", e);
+      setLoading(false);
+      return;
+    }
     // Make API Call to generate SQL on server, and getting the SQL
     let sqlGenerationResponse = null
     try {
@@ -66,6 +78,16 @@ function Page() {
     }
     catch (e) {
       console.log("Error running SQL: ", e)
+      setLoading(false)
+      return;
+    }
+    // Make API Call to interpret SQL Output by LLM
+    try {
+      const response = await axios.post("/api/interpret", { sqlOutput: postgresQueryResponse.data.data })
+      setMessages(prev => ([...prev, { party: "ai", content: response.data.data || "" }]))
+    }
+    catch (e) {
+      console.log("Error interpreting SQL: ", e)
       setLoading(false)
       return;
     }
