@@ -7,6 +7,7 @@ import OpenAI from "openai";
 import Markdown from 'react-markdown'
 import SimplebarCore from "simplebar"
 import "./app.css"
+import axios from "axios"
 
 // #region MAIN
 function Page() {
@@ -16,6 +17,10 @@ function Page() {
 
   const [loading, setLoading] = useState(false)
   const promptInputRef = useRef<HTMLInputElement>(null)
+
+  // Output states
+  const [sqlQuery, setSqlQuery] = useState("");
+  const [sqlOutput, setSqlOutput] = useState("");
 
   // #region Scroll
   const simplebarRef = useRef<SimplebarCore>(null)
@@ -28,14 +33,43 @@ function Page() {
       })
     }
   }
-
+  console.log(sqlOutput)
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  const sendMessage: SubmitEventHandler<HTMLFormElement> = (e) => {
+  const sendMessage: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
-    console.log("Hello")
+    const prompt = new FormData(e.currentTarget).get('chat-prompt') as string
+    if (!prompt || prompt === '') return;
+    // Add user prompt to messages state
+    setMessages(prev => ([...prev, { party: "self", content: prompt }]))
+    // Clear the prompt input
+    if (promptInputRef.current) promptInputRef.current.value = ""
+    setLoading(true)
+    // Make API Call to generate SQL on server, and getting the SQL
+    let sqlGenerationResponse = null
+    try {
+      sqlGenerationResponse = await axios.post("/api/generate", { prompt: prompt, history: history })
+      setSqlQuery(sqlGenerationResponse.data?.data || "")
+    }
+    catch (e) {
+      console.log("Error generating SQL: ", e)
+      setLoading(false)
+      return;
+    }
+    // Make API Call to RUN SQL on postgres
+    let postgresQueryResponse
+    try {
+      postgresQueryResponse = await axios.post("/api/run", { sql: sqlGenerationResponse.data.data })
+      setSqlOutput(postgresQueryResponse.data.data)
+    }
+    catch (e) {
+      console.log("Error running SQL: ", e)
+      setLoading(false)
+      return;
+    }
+    setLoading(false)
   }
 
   // #region JSX
@@ -64,6 +98,26 @@ function Page() {
           <input autoComplete="off" name="chat-prompt" type="text" placeholder="Type your prompt" ref={promptInputRef} />
           <button type="submit" disabled={loading}>Send {" >"}</button>
         </form>
+      </div>
+
+      <div className="output-container">
+        <div className="schemas">
+          <label>Relevant Schemas</label>
+        </div>
+        <div className="sql-query">
+          <label>SQL Query</label>
+          <SimpleBar style={{ height: "100%" }}>
+            {sqlQuery}
+          </SimpleBar>
+        </div>
+        <div className="sql-output">
+          <label>SQL Output</label>
+          <SimpleBar style={{ height: "100%" }}>
+            <pre style={{ whiteSpace: "pre-wrap" }}>
+              {JSON.stringify(sqlOutput, null, 2)}
+            </pre>
+          </SimpleBar>
+        </div>
       </div>
 
     </div>
