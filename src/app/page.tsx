@@ -7,7 +7,7 @@ import OpenAI from "openai";
 import Markdown from 'react-markdown'
 import SimplebarCore from "simplebar"
 import "./app.css"
-import axios from "axios"
+import axios, { AxiosError, AxiosResponse } from "axios"
 import { format } from "sql-formatter"
 
 // #region MAIN
@@ -20,9 +20,17 @@ function Page() {
   const promptInputRef = useRef<HTMLInputElement>(null)
 
   // Output states
-  const [sqlSchemas, setSqlSchemas] = useState("");
-  const [sqlQuery, setSqlQuery] = useState("");
-  const [sqlOutput, setSqlOutput] = useState("");
+  const [sqlSchemas, setSqlSchemas] = useState({ data: "", loading: false, error: "" });
+  const [sqlQuery, setSqlQuery] = useState({ data: "", loading: false, error: "" });
+  const [sqlOutput, setSqlOutput] = useState({ data: "", loading: false, error: "" });
+  useEffect(() => {
+    function resetLoadingStates() {
+      setSqlSchemas(prev => ({ ...prev, loading: false }))
+      setSqlQuery(prev => ({ ...prev, loading: false }))
+      setSqlOutput(prev => ({ ...prev, loading: false }))
+    }
+    if (!loading) resetLoadingStates()
+  }, [loading])
 
   // #region Scroll
   const simplebarRef = useRef<SimplebarCore>(null)
@@ -40,6 +48,7 @@ function Page() {
     scrollToBottom()
   }, [messages])
 
+  // #region Submit
   const sendMessage: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     const prompt = new FormData(e.currentTarget).get('chat-prompt') as string
@@ -49,40 +58,49 @@ function Page() {
     // Clear the prompt input
     if (promptInputRef.current) promptInputRef.current.value = ""
     setLoading(true)
+    setSqlSchemas(prev => ({ ...prev, error: "", loading: true }))
+    setSqlQuery(prev => ({ ...prev, error: "", loading: true }))
+    setSqlOutput(prev => ({ ...prev, error: "", loading: true }))
+    // #region filter
     // Make API Call to filter SQL Schemas
-    let filteredSchemasResponse = null
+    let filteredSchemasResponse: AxiosResponse<{ data: string }> | null = null
     try {
       filteredSchemasResponse = await axios.post("/api/filter", { prompt: prompt })
-      setSqlSchemas(filteredSchemasResponse.data.data)
+      setSqlSchemas(prev => ({ ...prev, data: filteredSchemasResponse?.data?.data || "", loading: false }))
     }
     catch (e) {
-      console.log("Error filtering schemas: ", e);
+      const error = e as AxiosError<{ data: string }>
+      setSqlSchemas(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
       setLoading(false);
       return;
     }
+    // #region generate
     // Make API Call to generate SQL on server, and getting the SQL
-    let sqlGenerationResponse = null
+    let sqlGenerationResponse: AxiosResponse<{ data: string }> | null = null
     try {
       sqlGenerationResponse = await axios.post("/api/generate", {
         prompt: prompt,
         history: history,
-        relevant_schemas: filteredSchemasResponse.data.data || ""
+        relevant_schemas: filteredSchemasResponse?.data.data || ""
       })
-      setSqlQuery(sqlGenerationResponse.data?.data || "")
+      setSqlQuery(prev => ({ ...prev, data: sqlGenerationResponse?.data?.data || "", loading: false }))
     }
     catch (e) {
-      console.log("Error generating SQL: ", e)
+      const error = e as AxiosError<{ data: string }>
+      setSqlQuery(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
       setLoading(false)
       return;
     }
+    // #region interpret
     // Make API Call to RUN SQL on postgres
-    let postgresQueryResponse
+    let postgresQueryResponse: AxiosResponse<{ data: string }> | null = null
     try {
-      postgresQueryResponse = await axios.post("/api/run", { sql: sqlGenerationResponse.data.data })
-      setSqlOutput(postgresQueryResponse.data.data)
+      postgresQueryResponse = await axios.post("/api/run", { sql: sqlGenerationResponse?.data?.data })
+      setSqlOutput(prev => ({ ...prev, data: postgresQueryResponse?.data?.data || "", loading: false }))
     }
     catch (e) {
-      console.log("Error running SQL: ", e)
+      const error = e as AxiosError<{ data: string }>
+      setSqlOutput(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
       setLoading(false)
       return;
     }
@@ -90,14 +108,12 @@ function Page() {
     try {
       const response = await axios.post("/api/interpret", {
         prompt: prompt,
-        sqlOutput: postgresQueryResponse.data.data
+        sqlOutput: postgresQueryResponse?.data?.data || ""
       })
       setMessages(prev => ([...prev, { party: "ai", content: response.data.data || "" }]))
     }
     catch (e) {
       console.log("Error interpreting SQL: ", e)
-      setLoading(false)
-      return;
     }
     setLoading(false)
   }
@@ -133,27 +149,48 @@ function Page() {
       <div className="output-container">
         <div className="schemas">
           <label>Relevant Schemas</label>
-          <SimpleBar style={{ height: "100%" }}>
-            <pre style={{ whiteSpace: "pre-wrap" }}>
-              {sqlSchemas}
-            </pre>
-          </SimpleBar>
+          {sqlSchemas.loading
+            ? <span className="loader"></span>
+            : sqlSchemas.error
+              ? <span className="error">{sqlSchemas.error}</span>
+              : (
+                <SimpleBar style={{ height: "100%", width: "100%" }}>
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                    {sqlSchemas.data}
+                  </pre>
+                </SimpleBar>
+              )
+          }
         </div>
         <div className="sql-query">
           <label>SQL Query</label>
-          <SimpleBar style={{ height: "100%" }}>
-            <pre style={{ whiteSpace: "pre-wrap" }}>
-              {format(sqlQuery, { language: "postgresql" })}
-            </pre>
-          </SimpleBar>
+          {sqlQuery.loading
+            ? <span className="loader"></span>
+            : sqlQuery.error
+              ? <span className="error">{sqlQuery.error}</span>
+              : (
+                <SimpleBar style={{ height: "100%", width: "100%" }}>
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                    {format(sqlQuery.data, { language: "postgresql" })}
+                  </pre>
+                </SimpleBar>
+              )
+          }
         </div>
         <div className="sql-output">
           <label>SQL Output</label>
-          <SimpleBar style={{ height: "100%" }}>
-            <pre style={{ whiteSpace: "pre-wrap" }}>
-              {JSON.stringify(sqlOutput, null, 2)}
-            </pre>
-          </SimpleBar>
+          {sqlOutput.loading
+            ? <span className="loader"></span>
+            : sqlOutput.error
+              ? <span className="error">{sqlOutput.error}</span>
+              : (
+                <SimpleBar style={{ height: "100%", width: "100%" }}>
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                    {JSON.stringify(sqlOutput.data, null, 2)}
+                  </pre>
+                </SimpleBar>
+              )
+          }
         </div>
       </div>
 

@@ -111,6 +111,9 @@
   position: relative;
   min-height: 0;
   padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container>.output-container>*:not(:last-of-type) {
@@ -123,4 +126,30 @@
   right: 4px;
   font-size: 12px;
   color: #848484;
+}
+
+.container>.output-container .loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.container>.output-container .error {
+  color: red;
+  font-size: 14px;
 }
