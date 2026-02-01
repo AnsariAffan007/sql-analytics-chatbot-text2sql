@@ -17,7 +17,7 @@ function Page() {
   const [history, setHistory] = useState<OpenAI.Chat.Completions.ChatCompletionMessageParam[]>([])
 
   const [loading, setLoading] = useState(false)
-  const promptInputRef = useRef<HTMLInputElement>(null)
+  const promptInputRef = useRef<HTMLTextAreaElement>(null)
 
   // Output states
   const [sqlSchemas, setSqlSchemas] = useState({ data: "", loading: false, error: "" });
@@ -152,8 +152,13 @@ function Page() {
           </SimpleBar>
         </div>
         <form onSubmit={sendMessage} className="chatinput">
-          <input autoComplete="off" name="chat-prompt" type="text" placeholder="Type your prompt" ref={promptInputRef} />
-          <button type="submit" disabled={loading}>Send {" >"}</button>
+          <textarea name="chat-prompt" className="chat-input-box" autoComplete="off" placeholder="Type your prompt" ref={promptInputRef} >
+
+          </textarea>
+          <div className="button-container">
+            <button type="submit" disabled={loading}>Send {" >"}</button>
+          </div>
+          {/* <input autoComplete="off" name="" type="text" placeholder="Type your prompt" ref={promptInputRef} /> */}
         </form>
       </div>
 

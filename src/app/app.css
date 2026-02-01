@@ -72,30 +72,42 @@
 .container>.chatbox>.chatinput {
   box-shadow: 0 -2px 6px #ddd;
   display: flex;
-  column-gap: 16px;
-  padding: 8px;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.container>.chatbox>.chatinput>input {
+.container>.chatbox>.chatinput>.chat-input-box {
   flex: 1;
   border: none;
-  padding: 8px;
   border-radius: 10px;
+  padding: 8px;
+  field-sizing: content;
+  resize: none;
+  min-height: 1lh;
+  max-height: 10lh;
 }
 
-.container>.chatbox>.chatinput>input:focus,
-.container>.chatbox>.chatinput>input:active {
+.container>.chatbox>.chatinput>.chat-input-box:focus,
+.container>.chatbox>.chatinput>.chat-input-box:active {
   outline: none;
 }
 
-.container>.chatbox>.chatinput>button {
+.container>.chatbox>.chatinput>.button-container {
+  /* box-shadow: 0 -2px 6px #ddd; */
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 8px;
+}
+
+.container>.chatbox>.chatinput>.button-container>button {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #ddd;
   cursor: pointer;
 }
 
-.container>.chatbox>.chatinput>button:active {
+.container>.chatbox>.chatinput>.button-container>button:active {
   outline: 1px solid #ccc
 }
 

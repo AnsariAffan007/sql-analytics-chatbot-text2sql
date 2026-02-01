@@ -17,7 +17,6 @@ export async function POST(request: Request) {
 
   const schema = await sql.unsafe(SCHEMA_RETRIEVAL_QUERY)
   const schemaString: string = schema.map(table => `${table.table_name} ${table.table_definition}`).join("\n")
-  console.log(getUserPrompt(schemaString, body.prompt))
 
   let response: OpenAI.Chat.Completions.ChatCompletion | null = null
 
