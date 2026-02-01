@@ -48,7 +48,7 @@ function Page() {
     scrollToBottom()
   }, [messages])
 
-  // #region Submit
+  // #region Submit Prompt
   const sendMessage: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     const prompt = new FormData(e.currentTarget).get('chat-prompt') as string
@@ -129,6 +129,20 @@ function Page() {
     setLoading(false)
   }
 
+  // #region Download Schema
+  const [schemaLoading, setSchemaLoading] = useState(false)
+  const downloadSchema = async () => {
+    setSchemaLoading(true)
+    try {
+      await new Promise(res => setTimeout(res, 1000))
+    }
+    catch (e) {
+      const error = e as AxiosError<{ data: string }>
+      alert(error?.response?.data?.data || "Failed to download schema")
+    }
+    setSchemaLoading(false)
+  }
+
   // #region JSX
   return (
     <div className="container">
@@ -156,6 +170,7 @@ function Page() {
 
           </textarea>
           <div className="button-container">
+            <button type="button" disabled={schemaLoading} onClick={downloadSchema}>Schema &#x2B73;</button>
             <button type="submit" disabled={loading}>Send {" >"}</button>
           </div>
           {/* <input autoComplete="off" name="" type="text" placeholder="Type your prompt" ref={promptInputRef} /> */}
