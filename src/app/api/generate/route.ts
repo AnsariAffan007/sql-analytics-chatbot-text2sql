@@ -4,8 +4,7 @@ import OpenAI from "openai";
 
 const openaiClient = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama",
-  dangerouslyAllowBrowser: true
+  apiKey: "ollama"
 });
 
 // #region POST
