@@ -74,36 +74,47 @@ function Page() {
       setLoading(false);
       return;
     }
+    let sqlRunError: string = "";
+    let sqlGenerationResponse: AxiosResponse<{ data: string }> | null = null
+    let postgresQueryResponse: AxiosResponse<{ data: string }> | null = null
     // #region generate
     // Make API Call to generate SQL on server, and getting the SQL
-    let sqlGenerationResponse: AxiosResponse<{ data: string }> | null = null
-    try {
-      sqlGenerationResponse = await axios.post("/api/generate", {
-        prompt: prompt,
-        history: history,
-        relevant_schemas: filteredSchemasResponse?.data.data || ""
-      })
-      setSqlQuery(prev => ({ ...prev, data: sqlGenerationResponse?.data?.data || "", loading: false }))
-    }
-    catch (e) {
-      const error = e as AxiosError<{ data: string }>
-      setSqlQuery(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
-      setLoading(false)
-      return;
+    let retries = 3;
+    while (retries >= 0) {
+      try {
+        sqlGenerationResponse = await axios.post("/api/generate", {
+          prompt: prompt,
+          relevant_schemas: filteredSchemasResponse?.data.data || "",
+          previousError: sqlRunError,
+          previousQuery: sqlGenerationResponse ? (sqlGenerationResponse?.data?.data || "") : ""
+        })
+        setSqlQuery(prev => ({ ...prev, data: sqlGenerationResponse?.data?.data || "", loading: false }))
+      }
+      catch (e) {
+        const error = e as AxiosError<{ data: string }>
+        setSqlQuery(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
+        setLoading(false)
+        return;
+      }
+      // #region run
+      // Make API Call to RUN SQL on postgres
+      try {
+        postgresQueryResponse = await axios.post("/api/run", { sql: sqlGenerationResponse?.data?.data })
+        setSqlOutput(prev => ({ ...prev, data: postgresQueryResponse?.data?.data || "", loading: false }))
+        break;
+      }
+      catch (e) {
+        const error = e as AxiosError<{ data: string }>
+        sqlRunError = error?.response?.data?.data || ""
+        retries -= 1;
+        if (retries < 0) {
+          setSqlOutput(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
+          setLoading(false)
+          return;
+        }
+      }
     }
     // #region interpret
-    // Make API Call to RUN SQL on postgres
-    let postgresQueryResponse: AxiosResponse<{ data: string }> | null = null
-    try {
-      postgresQueryResponse = await axios.post("/api/run", { sql: sqlGenerationResponse?.data?.data })
-      setSqlOutput(prev => ({ ...prev, data: postgresQueryResponse?.data?.data || "", loading: false }))
-    }
-    catch (e) {
-      const error = e as AxiosError<{ data: string }>
-      setSqlOutput(prev => ({ ...prev, loading: false, error: (error?.response?.data?.data || "") as string }))
-      setLoading(false)
-      return;
-    }
     // Make API Call to interpret SQL Output by LLM
     try {
       const response = await axios.post("/api/interpret", {

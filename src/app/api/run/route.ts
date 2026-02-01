@@ -10,7 +10,6 @@ export async function POST(request: Request) {
     queryRes = await sql.unsafe(body.sql)
   }
   catch (e) {
-    console.log("Error running SQL: \n", e)
     const message = e instanceof Error ? e.message : "Failed to run generated SQL";
     return NextResponse.json(
       { data: message },
