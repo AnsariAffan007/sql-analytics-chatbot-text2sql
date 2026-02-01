@@ -1,7 +1,6 @@
 import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import { format } from "sql-formatter";
 
 const openaiClient = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
