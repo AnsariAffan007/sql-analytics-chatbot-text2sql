@@ -134,7 +134,10 @@ function Page() {
   const downloadSchema = async () => {
     setSchemaLoading(true)
     try {
-      await new Promise(res => setTimeout(res, 1000))
+      const res = await axios.get("/api/schema");
+      const blob = new Blob([res?.data?.data || ""], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
     }
     catch (e) {
       const error = e as AxiosError<{ data: string }>

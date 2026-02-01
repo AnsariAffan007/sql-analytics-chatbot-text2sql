@@ -14,8 +14,18 @@ export async function POST(request: Request) {
 
   const body = await request.json()
 
-  const schema = await sql.unsafe(SCHEMA_RETRIEVAL_QUERY)
-  const schemaString: string = schema.map(table => `${table.table_name} ${table.table_definition}`).join("\n")
+  let schemaString = ''
+  try {
+    const schema = await sql.unsafe(SCHEMA_RETRIEVAL_QUERY)
+    schemaString = schema.map(table => `${table.table_name} ${table.table_definition}`).join("\n")
+  }
+  catch (e) {
+    console.log("Error retrieving schema: \n", e)
+    return NextResponse.json(
+      { data: "Failed to retrieve DB Schema to filter" },
+      { status: 500 }
+    )
+  }
 
   let response: OpenAI.Chat.Completions.ChatCompletion | null = null
 
