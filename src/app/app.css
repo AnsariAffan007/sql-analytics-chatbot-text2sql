@@ -9,7 +9,7 @@
   /* box-shadow: 0 0 8px #ccc; */
   border-right: 1px solid #ccc;
   /* border-radius: 10px; */
-  flex-basis: 50%;
+  width: 50%;
   display: flex;
   flex-direction: column;
 }
@@ -152,4 +152,8 @@
 .container>.output-container .error {
   color: red;
   font-size: 14px;
+}
+
+.container>.output-container .simplebar-placeholder {
+  display: none;
 }
