@@ -5,8 +5,8 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const openaiClient = new OpenAI({
-  baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama"
+  baseURL: process.env.FILTERER_MODEL_URL,
+  apiKey: process.env.FILTERER_MODEL_API_KEY,
 });
 
 // #region POST

@@ -1,7 +1,7 @@
 const TASK_MODELS = {
-  filter: "llama3.2:3b",
-  generate: "llama3.2:3b",
-  interpret: "llama3.2:3b"
+  filter: "nvidia/nemotron-nano-9b-v2:free",
+  generate: "nvidia/nemotron-nano-9b-v2:free",
+  interpret: "nvidia/nemotron-nano-9b-v2:free",
 }
 
 export default TASK_MODELS;
