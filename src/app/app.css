@@ -85,6 +85,7 @@
   resize: none;
   min-height: 1lh;
   max-height: 10lh;
+  font-family: inherit;
 }
 
 .container>.chatbox>.chatinput>.chat-input-box:focus,
