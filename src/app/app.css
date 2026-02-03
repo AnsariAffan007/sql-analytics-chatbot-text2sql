@@ -6,16 +6,14 @@
 
 /* -------------------------- CHATBOX ------------------------ */
 .container>.chatbox {
-  /* box-shadow: 0 0 8px #ccc; */
-  border-right: 1px solid #ccc;
-  /* border-radius: 10px; */
+  border-right: 1px solid #444;
   width: 50%;
   display: flex;
   flex-direction: column;
 }
 
 .container>.chatbox>.title {
-  box-shadow: 0 2px 6px #ddd;
+  border-bottom: 1px solid #444;
   padding-block: 16px;
 }
 
@@ -36,16 +34,16 @@
 }
 
 .container>.chatbox>.chatarea .message {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 16px;
   max-width: 75%;
   width: fit-content;
-  color: #222;
+  color: #ddd;
 }
 
 .container>.chatbox>.chatarea .message.sent {
   margin-left: auto;
+  background-color: #3b3b3b;
 }
 
 .container>.chatbox>.chatarea .message.recieved {
@@ -70,17 +68,19 @@
 }
 
 .container>.chatbox>.chatinput {
-  box-shadow: 0 -2px 6px #ddd;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background-color: #3b3b3b;
+  margin: 16px;
+  border-radius: 16px;
 }
 
 .container>.chatbox>.chatinput>.chat-input-box {
   flex: 1;
   border: none;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 16px;
+  padding: 16px 16px 0;
   field-sizing: content;
   resize: none;
   min-height: 1lh;
@@ -103,8 +103,10 @@
 
 .container>.chatbox>.chatinput>.button-container>button {
   padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  border-radius: 12px;
+  border: 1px solid #666;
+  background-color: #444;
+  color: #ddd;
   cursor: pointer;
 }
 
@@ -123,14 +125,15 @@
   flex-basis: 33.33%;
   position: relative;
   min-height: 0;
-  padding: 8px;
+  padding: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
+  color: #ddd;
 }
 
 .container>.output-container>*:not(:last-of-type) {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #444;
 }
 
 .container>.output-container>*>label {
@@ -144,7 +147,7 @@
 .container>.output-container .loader {
   width: 48px;
   height: 48px;
-  border: 5px solid #ccc;
+  border: 5px solid #666;
   border-bottom-color: transparent;
   border-radius: 50%;
   display: inline-block;
@@ -169,4 +172,9 @@
 
 .container>.output-container .simplebar-placeholder {
   display: none;
+}
+
+/* --------------------------------- SIMPLEBAR CUSTOMIZATIONS ---------- */
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:before {
+  background-color: #666
 }

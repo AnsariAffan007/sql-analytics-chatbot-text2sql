@@ -174,7 +174,7 @@ function Page() {
           </textarea>
           <div className="button-container">
             <button type="button" disabled={schemaLoading} onClick={downloadSchema}>Schema &#x2B73;</button>
-            <button type="submit" disabled={loading}>Send {" >"}</button>
+            <button type="submit" disabled={loading}>Send &#8250;</button>
           </div>
           {/* <input autoComplete="off" name="" type="text" placeholder="Type your prompt" ref={promptInputRef} /> */}
         </form>
