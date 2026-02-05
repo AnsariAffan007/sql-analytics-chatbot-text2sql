@@ -1,5 +1,5 @@
 import TASK_MODELS from "@/data/models";
-import sql from "@/db";
+import { sql } from "@/db"
 import SCHEMA_RETRIEVAL_QUERY from "@/db/schema-retriever";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";

@@ -1,4 +1,4 @@
-import sql from "@/db"
+import { sql } from "@/db"
 import SCHEMA_RETRIEVAL_QUERY from "@/db/schema-retriever"
 import { NextResponse } from "next/server"
 
