@@ -58,10 +58,8 @@ Rules:
 - You MUST NOT check for the presence of user's conditions in the JSON.
 - Answer directly and concisely in natural language.
 Output rules:
-- Do NOT use tables, markdown, bullet points, or lists.
-- Do NOT format the answer.
-- Respond in plain text only.
-- Use short sentences or a single paragraph.
+- Do NOT use tables.
+- IF required, format the answer in markdown.
 - Mention only what is visible in the JSON.
 `
 
