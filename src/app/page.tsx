@@ -58,6 +58,30 @@ function Page() {
     // Clear the prompt input
     if (promptInputRef.current) promptInputRef.current.value = ""
     setLoading(true)
+    // #region routing
+    let intent: string = ""
+    try {
+      const res = await axios.post("/api/intend", { prompt: prompt })
+      intent = res?.data?.data
+      if (!["CHAT", "NEW_QUERY"].includes(intent)) {
+        setLoading(false)
+        return;
+      }
+    }
+    catch {
+      setLoading(false)
+      return;
+    }
+    // #region chat
+    if (intent === "CHAT") {
+      try {
+        const response = await axios.post("/api/chat", { prompt: prompt })
+        setMessages(prev => ([...prev, { party: "ai", content: response.data.data || "" }]))
+      }
+      catch { }
+      setLoading(false)
+      return;
+    }
     setSqlSchemas(prev => ({ ...prev, error: "", loading: true }))
     setSqlQuery(prev => ({ ...prev, error: "", loading: true }))
     setSqlOutput(prev => ({ ...prev, error: "", loading: true }))
