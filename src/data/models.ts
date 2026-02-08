@@ -1,7 +1,7 @@
 const TASK_MODELS = {
-  intender: "llama3.2:3b",
-  chat: "llama3.2:3b",
-  embedder: "embeddinggemma:300m",
+  intender: "openai/gpt-oss-20b:free",
+  chat: "openai/gpt-oss-20b:free",
+  embedder: "intfloat/e5-base-v2",
   filter: "openai/gpt-oss-20b:free",
   generate: "openai/gpt-oss-20b:free",
   interpret: "openai/gpt-oss-20b:free",
