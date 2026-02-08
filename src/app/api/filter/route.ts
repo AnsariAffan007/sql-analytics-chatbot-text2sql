@@ -1,15 +1,16 @@
-import { vector } from "@/db"
-import { Collection, Metadata, QueryResult } from "chromadb";
 import { NextResponse } from "next/server";
 import TASK_MODELS from "@/data/models";
 import axios from "axios";
+import { sql } from "@/db";
+import postgres from "postgres";
+import pgvector from "pgvector"
 
 const embedQuery = async (text: string) => {
   const res = await axios.post("http://127.0.0.1:11434/api/embed", {
     model: TASK_MODELS.embedder,
     input: text
   });
-  return [res.data.embeddings[0]];
+  return res.data.embeddings[0];
 };
 
 // #region POST
@@ -49,31 +50,14 @@ export async function POST(request: Request) {
   //   )
   // }
 
-  let vectorCollection: Collection | null = null
+  const queryEmbedding = pgvector.toSql(await embedQuery(body.prompt))
+
+  let items: postgres.RowList<postgres.Row[]>;
   try {
-    vectorCollection = await vector.getCollection({
-      name: "dvdrental-table-definitions",
-    })
+    items = await sql`SELECT table_definition FROM table_embeddings ORDER BY embedding <-> ${queryEmbedding} LIMIT 5`;
   }
   catch (e) {
-    console.log("Error getting collection: \n", e)
-    return NextResponse.json(
-      { data: "Something has gone wrong" },
-      { status: 500 }
-    )
-  }
-
-  const queryEmbedding = await embedQuery(body.prompt)
-
-  let result: QueryResult<Metadata> | null = null
-  try {
-    result = await vectorCollection.query({
-      queryEmbeddings: queryEmbedding,
-      nResults: 5,
-    })
-  }
-  catch (e) {
-    console.log("Error retrieving vectors: \n", e)
+    console.log("Failed to retrieve documents: \n", e)
     return NextResponse.json(
       { data: "Something has gone wrong" },
       { status: 500 }
@@ -81,7 +65,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { data: result.documents[0].join("\n") },
+    { data: items.map(table => table.table_definition).join("\n") },
     { status: 200 }
   )
 }
