@@ -1,16 +1,22 @@
 import { NextResponse } from "next/server";
 import TASK_MODELS from "@/data/models";
-import axios from "axios";
 import { sql } from "@/db";
 import postgres from "postgres";
 import pgvector from "pgvector"
+import OpenAI from "openai";
+
+const openaiClient = new OpenAI({
+  baseURL: "https://api.cohere.ai/compatibility/v1",
+  apiKey: process.env.COHERE_API_KEY,
+});
 
 const embedQuery = async (text: string) => {
-  const res = await axios.post("http://127.0.0.1:11434/api/embed", {
+  const embedding = await openaiClient.embeddings.create({
     model: TASK_MODELS.embedder,
-    input: text
-  });
-  return res.data.embeddings[0];
+    input: text,
+    encoding_format: "float"
+  })
+  return embedding.data[0].embedding
 };
 
 // #region POST
