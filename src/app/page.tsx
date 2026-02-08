@@ -113,6 +113,12 @@ function Page() {
           previousQuery: sqlGenerationResponse ? (sqlGenerationResponse?.data?.data || "") : ""
         })
         setSqlQuery(prev => ({ ...prev, data: sqlGenerationResponse?.data?.data || "", loading: false }))
+        if (sqlGenerationResponse?.data.data && ["OPERATION_NOT_ALLOWED", "NO_RELEVANT_SCHEMAS"].includes(sqlGenerationResponse.data.data)) {
+          setSqlQuery(prev => ({ ...prev, loading: false, error: (sqlGenerationResponse?.data?.data) as string }))
+          setSqlOutput(prev => ({ ...prev, loading: false, error: (sqlGenerationResponse?.data?.data) as string }))
+          setLoading(false)
+          return;
+        }
       }
       catch (e) {
         const error = e as AxiosError<{ data: string }>

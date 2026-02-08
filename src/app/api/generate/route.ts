@@ -62,7 +62,7 @@ Strict rules:
 Schema validation rules: 
 - If the user prompt cannot be answered using the provided schemas, output exactly NO_RELEVANT_SCHEMAS.
 Safety rules: 
-- If the user explicitly or implicitly asks for data modification, schema changes, or destructive operations, do not generate SQL and instead output exactly NO_RELEVANT_SCHEMAS. 
+- If the user explicitly or implicitly asks for data modification, schema changes, or destructive operations, do not generate SQL and instead output exactly OPERATION_NOT_ALLOWED. 
 Formatting rules: 
 - The query must be syntactically valid SQL string. 
 - Always include LIMIT 10 (or the SQL-dialect equivalent) at the end of the query. 
