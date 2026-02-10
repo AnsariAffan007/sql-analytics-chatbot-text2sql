@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   let items: postgres.RowList<postgres.Row[]>;
   try {
-    items = await sql`SELECT table_definition FROM table_embeddings ORDER BY embedding <-> ${queryEmbedding} LIMIT 5`;
+    items = await sql`SELECT table_definition, embedding <-> ${queryEmbedding} as distance FROM table_embeddings ORDER BY embedding <-> ${queryEmbedding} LIMIT 10`;
   }
   catch (e) {
     console.log("Failed to retrieve documents: \n", e)
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { data: items.map(table => table.table_definition).join("\n") },
+    { data: items.filter(item => item.distance < 1).map(table => table.table_definition).join("\n") },
     { status: 200 }
   )
 }
