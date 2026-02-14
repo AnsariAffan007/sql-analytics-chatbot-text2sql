@@ -1,4 +1,3 @@
-import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -15,12 +14,16 @@ export async function POST(request: Request) {
   let response: OpenAI.Chat.Completions.ChatCompletion | null = null
 
   try {
+    if (!process.env.INTERPRETER_MODEL_NAME) return NextResponse.json(
+      { data: "Interpreter model name not found" },
+      { status: 500 }
+    )
     response = await openaiClient.chat.completions.create({
       messages: [
         { role: "system", content: getSystemPrompt() },
         { role: "user", content: getUserPrompt(body.sqlOutput, body.prompt) }
       ],
-      model: TASK_MODELS.interpret
+      model: process.env.INTERPRETER_MODEL_NAME
     })
   }
   catch (e) {

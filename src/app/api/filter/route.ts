@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import TASK_MODELS from "@/data/models";
 import { sql } from "@/db";
 import postgres from "postgres";
 import pgvector from "pgvector"
 import OpenAI from "openai";
 
 const openaiClient = new OpenAI({
-  baseURL: "https://api.cohere.ai/compatibility/v1",
-  apiKey: process.env.COHERE_API_KEY,
+  baseURL: process.env.EMBEDDER_MODEL_URL,
+  apiKey: process.env.EMBEDDER_MODEL_API_KEY,
 });
 
 const embedQuery = async (text: string) => {
+  if (!process.env.EMBEDDER_MODEL_NAME) throw new Error('Embedder model name not found')
   const embedding = await openaiClient.embeddings.create({
-    model: TASK_MODELS.embedder,
+    model: process.env.EMBEDDER_MODEL_NAME,
     input: text,
     encoding_format: "float"
   })
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   //       { role: "system", content: getSystemPrompt() },
   //       { role: "user", content: getUserPrompt(schemaString, body.prompt) }
   //     ],
-  //     model: TASK_MODELS.filter
+  //     model: model
   //   })
   // }
   // catch (e) {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { data: items.filter(item => item.distance < 1).map(table => table.table_definition).join("\n") },
+    { data: items.map(table => table.table_definition).join("\n") },
     { status: 200 }
   )
 }

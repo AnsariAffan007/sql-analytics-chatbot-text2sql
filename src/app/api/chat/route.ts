@@ -1,4 +1,3 @@
-import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -14,12 +13,16 @@ export async function POST(request: Request) {
   let response: OpenAI.Chat.Completions.ChatCompletion | null = null
 
   try {
+    if (!process.env.CHAT_MODEL_NAME) return NextResponse.json(
+      { data: "Chat model not found" },
+      { status: 500 }
+    )
     response = await openaiClient.chat.completions.create({
       messages: [
         { role: "system", content: getSystemPrompt() },
         { role: "user", content: body.prompt }
       ],
-      model: TASK_MODELS.chat
+      model: process.env.CHAT_MODEL_NAME
     })
   }
   catch (e) {

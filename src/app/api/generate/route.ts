@@ -1,4 +1,3 @@
-import TASK_MODELS from "@/data/models";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -15,6 +14,10 @@ export async function POST(request: Request) {
   let response: OpenAI.Chat.Completions.ChatCompletion | null = null
 
   try {
+    if (!process.env.GENERATOR_MODEL_NAME) return NextResponse.json(
+      { data: "Generator model name not found" },
+      { status: 500 }
+    )
     response = await openaiClient.chat.completions.create({
       messages: [
         { role: "system", content: getSystemPrompt() },
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
           )
         }
       ],
-      model: TASK_MODELS.generate
+      model: process.env.GENERATOR_MODEL_NAME
     })
   }
   catch (e) {
@@ -59,6 +62,7 @@ Strict rules:
 - Do not include formatting, back ticks, quotes.
 - Do not include comments, explanations, markdown, or any additional text.
 - Every selected column must be fully qualified with its table name. Columns should only be selected from relevant tables.
+- If the query involves aggregation, ranking, sorting, filtering, comparison, or grouping based on a calculated value (e.g., SUM, COUNT, AVG, MAX, MIN), the SQL query MUST include that calculated metric in the SELECT clause — even if the user did not explicitly request it.
 Schema validation rules: 
 - If the user prompt cannot be answered using the provided schemas, output exactly NO_RELEVANT_SCHEMAS.
 Safety rules: 
